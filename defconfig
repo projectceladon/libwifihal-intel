@@ -1,0 +1,6 @@
+# Debug level: trace=0, debug=1, warning=2, error=3
+CONFIG_DEBUG=1
+#CONFIG_NO_SYSLOG is not set
+CONFIG_DEBUG_STDOUT=y
+#CONFIG_GLOBAL_CTRL_IFACE
+CONFIG_LLS_ENABLED=y
