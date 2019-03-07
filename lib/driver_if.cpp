@@ -150,8 +150,9 @@ struct drv_state {
 	u8 last_band;
 
 	bool pno_supported;
+#ifdef ENABLE_TDLS
 	bool tdls_supported;
-
+#endif // ENABLE_TDLS
 	bool self_managed_reg;
 	struct ftm_data ftm;
 
@@ -849,8 +850,10 @@ static int wiphy_info_handler(struct nl_msg *msg, void *data)
 	/* Handle supported commands */
 	wiphy_info_supp_cmds(tb[NL80211_ATTR_SUPPORTED_COMMANDS], drv);
 
+#ifdef ENABLE_TDLS
 	if (tb[NL80211_ATTR_TDLS_SUPPORT])
 		drv->tdls_supported = true;
+#endif // ENABLE_TDLS
 
 	if (tb[NL80211_ATTR_WIPHY_SELF_MANAGED_REG])
 		drv->self_managed_reg = true;
@@ -1740,8 +1743,10 @@ feature_set driver_if_get_feature_set(void *handle)
 	if (drv->pno_supported)
 		fs |= WIFI_FEATURE_PNO;
 
+#ifdef ENABLE_TDLS
 	if (drv->tdls_supported)
 		fs |= WIFI_FEATURE_TDLS;
+#endif // ENABLE_TDLS
 
 	/* Check about STA + STA and STA + AP */
 	for (i = 0; i < drv->n_combs; i++) {
