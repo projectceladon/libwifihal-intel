@@ -1722,11 +1722,12 @@ feature_set driver_if_get_feature_set(void *handle)
 		for (i = 0; i < drv->n_bands; i++)
 			if (drv->bands[i].band == NL80211_BAND_5GHZ)
 				fs |= WIFI_FEATURE_INFRA_5G;
-
+#ifdef ENABLE_PASSPOINT
 		/* With all latest hostap version, if station is supported, also
 		 * offchannel is supported so hotspot is also supported.
 		 */
 		fs |= WIFI_FEATURE_HOTSPOT;
+#endif // ENABLE_PASSPOINT
 	}
 
 	if (drv->iftypes & BIT(NL80211_IFTYPE_AP))
