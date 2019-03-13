@@ -10,7 +10,18 @@ UTIL_DIR := util
 LOCAL_REQUIRED_MODULES :=
 
 LOCAL_CPPFLAGS += -Wno-unused-parameter -Wno-int-to-pointer-cast -Wno-missing-field-initializers
-LOCAL_CPPFLAGS += -Wno-conversion-null
+LOCAL_CPPFLAGS += \
+        -D_FORTIFY_SOURCE=2 \
+        -fstack-protector-strong \
+        -Wformat -Wformat-security \
+        -Wall -Wextra -Wsign-compare -Wpointer-arith \
+        -Wcast-qual -Wcast-align \
+        -Wno-unused-parameter \
+        -Wno-int-to-pointer-cast \
+        -Wno-missing-field-initializers \
+        -Wno-conversion-null \
+        -Werror \
+        -Wnull-dereference
 LOCAL_CPPFLAGS += -DCONFIG_LIBNL20
 LOCAL_CPPFLAGS += -DCONFIG_ANDROID_LOG
 

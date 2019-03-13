@@ -56,15 +56,6 @@ static inline int nl_socket_set_buffer_size(struct nl_sock *sk,
 
 #endif /* CONFIG_LIBNL20 && CONFIG_LIBNL30 */
 
-static inline s64 nla_get_s64(struct nlattr *nla)
-{
-	s64 tmp;
-
-	nla_memcpy(&tmp, nla, sizeof(tmp));
-
-	return tmp;
-}
-
 /* C++ compatability */
 
 /**
@@ -221,25 +212,10 @@ static int no_seq_check(struct nl_msg *msg, void *arg)
  *
  * Returns the channel frequency in MHz.
  */
-static u32 channel_to_freq(u32 channel_number)
-{
-	if (channel_number < 14)
-		return 2407 + channel_number * 5;
-
-	if (channel_number == 14)
-		return 2484;
-
-	if (channel_number >= 182 && channel_number <= 196)
-		return 4000 + channel_number * 5;
-
-	return 5000 + channel_number * 5;
-}
 
 static void drv_vendor_event(struct drv_state *drv, struct nlattr **tb)
 {
 	u32 vendor_id, subcmd;
-	void *data = NULL;
-	size_t len = 0;
 
 	if (!tb[NL80211_ATTR_VENDOR_ID] || !tb[NL80211_ATTR_VENDOR_SUBCMD])
 		return;
@@ -673,8 +649,8 @@ static int wiphy_info_parse_single_comb(struct nlattr *comb_attr,
 			goto fail_comb;
 		}
 
-		cur_limits = (iface_limits *)
-			&combination->limits[combination->n_limits - 1];
+		cur_limits = const_cast<iface_limits *>
+                        (&combination->limits[combination->n_limits - 1]);
 		cur_limits->max =
 			nla_get_u32(tb_limit[NL80211_IFACE_LIMIT_MAX]);
 		cur_limits->types = 0;
@@ -1889,33 +1865,18 @@ int driver_set_country_code(void *handle, const char *code)
 	return ret;
 }
 
-static int get_nl80211_bw(wifi_channel_width bw)
-{
-	switch (bw) {
-	case WIFI_CHAN_WIDTH_20:
-		return NL80211_CHAN_WIDTH_20;
-	case WIFI_CHAN_WIDTH_40:
-		return NL80211_CHAN_WIDTH_40;
-	case WIFI_CHAN_WIDTH_80:
-		return NL80211_CHAN_WIDTH_80;
-	case WIFI_CHAN_WIDTH_160:
-		return NL80211_CHAN_WIDTH_160;
-	case WIFI_CHAN_WIDTH_80P80:
-		return NL80211_CHAN_WIDTH_80P80;
-	default:
-		hal_printf(MSG_ERROR, "RTT: bw: %d is not supported!", bw);
-		return -1;
-	}
-}
-
 static void event_handler_sock(struct nl_sock *sock)
 {
-	struct nl_cb *cb = nl_socket_get_cb(sock);
+	struct nl_cb *cb = NULL;
+	
+	if (sock != NULL) {
+		cb = nl_socket_get_cb(sock);
 
-	if (nl_recvmsgs(sock, cb) < 0)
-		hal_printf(MSG_ERROR, "Error receiving event res");
+		if (nl_recvmsgs(sock, cb) < 0)
+			hal_printf(MSG_ERROR, "Error receiving event res");
 
-	nl_cb_put(cb);
+		nl_cb_put(cb);
+	}
 }
 
 static void drv_sigusr1(int i)
@@ -1973,14 +1934,14 @@ void driver_if_events(void *handle)
 	while (!drv->in_cleanup) {
 		pfd[1].fd = drv->nl_rtt ? nl_socket_get_fd(drv->nl_rtt) : -1;
 		int res = ppoll(pfd, NFDS, &ts, &sms);
-		hal_printf(MSG_TRACE, "Out of event poll");
+		hal_printf(MSG_ERROR, "Out of event poll");
 
 		if (res < 0 && errno != EINTR) {
 			hal_printf(MSG_ERROR,
 				   "Error event socket res=%d, errno=%d",
 				   res, errno);
 		} else if (res == 0) {
-			hal_printf(MSG_TRACE, "Timeout on event socket");
+			hal_printf(MSG_ERROR, "Timeout on event socket");
 		} else {
 			for (i = 0; i < NFDS; i++) {
 				if (pfd[i].revents & POLLERR) {

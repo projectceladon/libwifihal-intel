@@ -41,10 +41,8 @@
  */
 #ifdef __CHECKER__
 #define __force __attribute__((force))
-#define __bitwise __attribute__((bitwise))
 #else
 #define __force
-#define __bitwise
 #endif
 
 typedef u16 __bitwise be16;
