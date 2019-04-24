@@ -25,6 +25,8 @@
 #include "ieee802_11_defs.h"
 #include "utils.h"
 
+#define DRV_FW_VERSION_MAX_LEN 50
+
 enum drv_event {
 	DRV_EVENT_DEL_STATION,
 	DRV_EVENT_CONNECT,
@@ -147,5 +149,6 @@ int driver_get_survey(void *handle, u32 ifidx, struct dl_list *survey_list);
 
 int driver_set_country_code(void *handle, const char *code);
 int driver_get_country_code(void *handle, char *code);
-
+int driver_get_fw_version(void *handle, char *buffer, int buffer_size);
+int driver_get_drv_version(void *handle, char *buffer, int buffer_size);
 #endif /* __DRIVER_IF_H__ */

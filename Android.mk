@@ -55,3 +55,5 @@ LOCAL_MODULE := libwifi-hal-intel
 LOCAL_PROPRIETARY_MODULE := true
 
 include $(BUILD_STATIC_LIBRARY)
+
+include $(LOCAL_PATH)/wpa_supplicant_8_lib/Android.mk

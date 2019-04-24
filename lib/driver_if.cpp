@@ -28,10 +28,10 @@
 #include <math.h>
 
 #include "utils.h"
+#include "iwl_vendor_cmd_copy.h"
 #include "driver_if.h"
 #include "nl80211_copy.h"
 #include "hal_debug.h"
-#include "gscan.h"
 
 /* libnl 1.x compatibility code */
 #if !defined(CONFIG_LIBNL20) && !defined(CONFIG_LIBNL30)
@@ -297,6 +297,33 @@ static int nl80211_init_socket(struct nl_sock **nl_sock, struct nl_cb *cb)
 	}
 
 	return 0;
+}
+static int drv_vendor_cmd(struct drv_state *drv, unsigned int subcmd,
+			  const u8 *data, size_t data_len, int flags,
+			  int (*valid_handler)(struct nl_msg *, void *),
+			  void *arg)
+{
+	struct nl_msg *msg;
+	int ret = 0;
+
+	msg = alloc_nl80211_cmd_msg(drv, flags, NL80211_CMD_VENDOR);
+	if (!msg)
+		return -1;
+
+	hal_printf(MSG_DEBUG, "subcmd= %d",subcmd);
+	NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, drv->ifidx);
+	NLA_PUT_U32(msg, NL80211_ATTR_VENDOR_ID, INTEL_OUI);
+	NLA_PUT_U32(msg, NL80211_ATTR_VENDOR_SUBCMD, subcmd);
+	if (data)
+		NLA_PUT(msg, NL80211_ATTR_VENDOR_DATA, data_len, data);
+	ret = send_and_recv(drv, msg, valid_handler, arg);
+	if (ret)
+		hal_printf(MSG_ERROR, "vendor command failed err=%d", ret);
+	return ret;
+
+nla_put_failure:
+	nlmsg_free(msg);
+	return -ENOBUFS;
 }
 
 struct family_data {
@@ -1420,6 +1447,17 @@ nla_put_failure:
 	return -ENOBUFS;
 }
 
+static struct nlattr *parse_vendor_reply(struct nl_msg *msg)
+{
+	struct nlattr *tb[NL80211_ATTR_MAX + 1];
+	struct genlmsghdr *gnlh = (struct genlmsghdr *)
+		nlmsg_data(nlmsg_hdr(msg));
+
+	nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
+	genlmsg_attrlen(gnlh, 0), NULL);
+	return tb[NL80211_ATTR_VENDOR_DATA];
+}
+
 static void drv_del_station_event(struct drv_state *drv, struct nl_msg *msg,
 				  struct nlattr **tb)
 {
@@ -1843,6 +1881,99 @@ nla_put_failure:
 	return -ENOBUFS;
 }
 
+static int get_fw_version_handler(struct nl_msg *msg, void *arg)
+{
+	struct nlattr *cap[MAX_IWL_MVM_VENDOR_ATTR + 1];
+	static struct nla_policy attr_policy[NUM_IWL_MVM_VENDOR_ATTR] = {};
+	char *code = (char *)arg;
+
+	struct nlattr *data = parse_vendor_reply(msg);
+	if (!data)
+	    return NL_SKIP;
+
+	attr_policy[IWL_MVM_VENDOR_ATTR_FW_VER].type = NLA_STRING;
+
+	if (nla_parse_nested(cap, MAX_IWL_MVM_VENDOR_ATTR,
+	    data, attr_policy)) {
+		hal_printf(MSG_WARNING, "Failed to get fw version");
+		return NL_SKIP;
+	}
+	if (!cap[IWL_MVM_VENDOR_ATTR_FW_VER]) {
+	    hal_printf(MSG_DEBUG, "nl80211: F/w version unavailable");
+	    return NL_SKIP;
+	}
+
+	//copy attribute to a sized string
+	nla_strlcpy(code, cap[IWL_MVM_VENDOR_ATTR_FW_VER],
+		    DRV_FW_VERSION_MAX_LEN);
+	return NL_SKIP;
+}
+
+
+int driver_get_fw_version(void *handle, char *buf, int buf_size)
+{
+	int ret;
+	struct drv_state *drv = (struct drv_state *)handle;
+
+	if (DRV_NOT_INIT(drv, __func__))
+		return -ENODEV;
+
+	buf[0] = '\0';
+
+	ret = drv_vendor_cmd(drv, IWL_MVM_VENDOR_CMD_GET_FW_VERSION,
+			     NULL, 0, 0, get_fw_version_handler, buf);
+	if (!buf)
+		ret = -EINVAL;
+
+	return ret;
+}
+
+static int get_drv_version_handler(struct nl_msg *msg, void *arg)
+{
+	struct nlattr *cap[MAX_IWL_MVM_VENDOR_ATTR + 1];
+	static struct nla_policy attr_policy[NUM_IWL_MVM_VENDOR_ATTR] = {};
+        char *code = (char *)arg;
+
+	struct nlattr *data = parse_vendor_reply(msg);
+	if (!data)
+	    return NL_SKIP;
+
+	attr_policy[IWL_MVM_VENDOR_ATTR_DRV_VER].type = NLA_STRING;
+
+	if (nla_parse_nested(cap, MAX_IWL_MVM_VENDOR_ATTR, data, attr_policy)) {
+		hal_printf(MSG_WARNING, "Failed to get driver version");
+		return NL_SKIP;
+	}
+
+	if (!cap[IWL_MVM_VENDOR_ATTR_DRV_VER]) {
+		hal_printf(MSG_DEBUG, "nl80211: Driver version unavailable");
+		return NL_SKIP;
+	}
+	//copy attribute to a sized string
+	nla_strlcpy(code, cap[IWL_MVM_VENDOR_ATTR_DRV_VER],
+		    DRV_FW_VERSION_MAX_LEN);
+	return NL_SKIP;
+}
+
+
+int driver_get_drv_version(void *handle, char *buf, int buf_size)
+{
+	int ret;
+	struct drv_state *drv = (struct drv_state *)handle;
+
+	if (DRV_NOT_INIT(drv, __func__))
+		return -ENODEV;
+
+	buf[0] = '\0';
+
+	ret = drv_vendor_cmd(drv, IWL_MVM_VENDOR_CMD_GET_DRV_VERSION,
+			     NULL, 0, 0, get_drv_version_handler, buf);
+	if (!buf)
+	    ret = -EINVAL;
+
+	return ret;
+}
+
 int driver_set_country_code(void *handle, const char *code)
 {
 	struct nl_msg *msg;
@@ -1856,8 +1987,7 @@ int driver_set_country_code(void *handle, const char *code)
 	if (!msg)
 		return -ENOBUFS;
 
-	if (nla_put(msg, NL80211_ATTR_REG_ALPHA2, 2,
-		    (const u8 *)code)) {
+	if (nla_put(msg, NL80211_ATTR_REG_ALPHA2, 2, (const u8 *)code)) {
 		nlmsg_free(msg);
 		return -ENOBUFS;
 	}
@@ -1867,7 +1997,6 @@ int driver_set_country_code(void *handle, const char *code)
 	if (ret)
 		hal_printf(MSG_ERROR, "Failed to set country code: err = %d (self-managed=%d)",
 			   ret, drv->self_managed_reg);
-
 	return ret;
 }
 
@@ -1944,8 +2073,7 @@ void driver_if_events(void *handle)
 
 		if (res < 0 && errno != EINTR) {
 			hal_printf(MSG_ERROR,
-				   "Error event socket res=%d, errno=%d",
-				   res, errno);
+				   "Error event socket res=%d, errno=%d", res, errno);
 		} else if (res == 0) {
 			hal_printf(MSG_ERROR, "Timeout on event socket");
 		} else {
