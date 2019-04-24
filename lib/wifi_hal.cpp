@@ -246,7 +246,7 @@ void wifi_event_loop(wifi_handle handle)
 }
 
 void wifi_get_error_info(wifi_error err, const char **msg) {
-    *msg = NULL;
+	*msg = NULL;
 }
 
 wifi_error wifi_get_supported_feature_set(wifi_interface_handle handle,
@@ -342,12 +342,12 @@ do {                                  \
 
 /* List of all supported channels, including 5GHz channels */
 wifi_error wifi_get_supported_channels(wifi_handle handle, int *size, wifi_channel *list) {
-    return WIFI_ERROR_UNINITIALIZED;
+	return WIFI_ERROR_UNINITIALIZED;
 }
 
 /* Enhanced power reporting */
 wifi_error wifi_is_epr_supported(wifi_handle handle) {
-    return WIFI_ERROR_UNINITIALIZED;
+	return WIFI_ERROR_UNINITIALIZED;
 }
 
 /* multiple interface support */
@@ -388,12 +388,13 @@ wifi_error wifi_get_iface_name(wifi_interface_handle iface, char *name,
 }
 
 wifi_error wifi_set_iface_event_handler(wifi_request_id id,
-            wifi_interface_handle iface, wifi_event_handler eh) {
-    return WIFI_ERROR_UNINITIALIZED;
+		wifi_interface_handle iface, wifi_event_handler eh) {
+	return WIFI_ERROR_UNINITIALIZED;
 }
 
-wifi_error wifi_reset_iface_event_handler(wifi_request_id id, wifi_interface_handle iface) {
-    return WIFI_ERROR_UNINITIALIZED;
+wifi_error wifi_reset_iface_event_handler(wifi_request_id id,
+		wifi_interface_handle iface) {
+	return WIFI_ERROR_UNINITIALIZED;
 }
 
 wifi_error wifi_get_valid_channels(wifi_interface_handle handle,
@@ -419,23 +420,21 @@ wifi_error wifi_get_valid_channels(wifi_interface_handle handle,
 }
 
 wifi_error wifi_set_nodfs_flag(wifi_interface_handle iface, u32 nodfs) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_rtt_capabilities(wifi_interface_handle iface,
-        wifi_rtt_capabilities *capabilities)
-{
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_rtt_capabilities *capabilities) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_start_logging(wifi_interface_handle iface, u32 verbose_level, u32 flags,
-        u32 max_interval_sec, u32 min_data_size, char *buffer_name) {
-            return WIFI_ERROR_NOT_SUPPORTED;
+		u32 max_interval_sec, u32 min_data_size, char *buffer_name) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_set_country_code(wifi_interface_handle iface, const char *code) {
 	char current_code[3];
-
 	hal_printf(MSG_DEBUG, "%s", __func__);
 
 	if (WIFI_INFO_INVALID(iface, __func__) || !code)
@@ -459,84 +458,108 @@ wifi_error wifi_set_country_code(wifi_interface_handle iface, const char *code) 
 }
 
 wifi_error wifi_get_firmware_memory_dump( wifi_interface_handle iface,
-        wifi_firmware_memory_dump_handler handler){
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_firmware_memory_dump_handler handler) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_set_log_handler(wifi_request_id id, wifi_interface_handle iface,
-        wifi_ring_buffer_data_handler handler) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_ring_buffer_data_handler handler) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_reset_log_handler(wifi_request_id id, wifi_interface_handle iface) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_set_alert_handler(wifi_request_id id, wifi_interface_handle iface,
-        wifi_alert_handler handler) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_alert_handler handler) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_reset_alert_handler(wifi_request_id id, wifi_interface_handle iface) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_firmware_version( wifi_interface_handle iface, char *buffer,
         int buffer_size) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+
+	hal_printf(MSG_DEBUG, "%s", __func__);
+	if ((WIFI_INFO_INVALID(iface, __func__)) || !(buffer && (buffer_size > 0)))
+		return WIFI_ERROR_INVALID_ARGS;
+
+	if (driver_get_fw_version(iface->handle->drv, buffer, buffer_size) < 0)
+		return WIFI_ERROR_UNKNOWN;
+
+	return WIFI_SUCCESS;
 }
 
 wifi_error wifi_get_ring_buffers_status(wifi_interface_handle iface,
-        u32 *num_rings, wifi_ring_buffer_status *status) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		u32 *num_rings, wifi_ring_buffer_status *status) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_logger_supported_feature_set(wifi_interface_handle iface,
-        unsigned int *support) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		unsigned int *support) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_ring_data(wifi_interface_handle iface, char *ring_name) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_driver_version(wifi_interface_handle iface, char *buffer,
         int buffer_size) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+
+	hal_printf(MSG_DEBUG, "%s", __func__);
+	if ((WIFI_INFO_INVALID(iface, __func__)) || !(buffer && (buffer_size > 0)))
+		return WIFI_ERROR_INVALID_ARGS;
+
+	if (driver_get_drv_version(iface->handle->drv, buffer, buffer_size) < 0)
+		return WIFI_ERROR_UNKNOWN;
+
+	return WIFI_SUCCESS;
 }
 
 wifi_error wifi_enable_tdls(wifi_interface_handle iface, mac_addr addr,
-        wifi_tdls_params *params, wifi_tdls_handler handler) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_tdls_params *params, wifi_tdls_handler handler) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_disable_tdls(wifi_interface_handle iface, mac_addr addr) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_tdls_status(wifi_interface_handle iface, mac_addr addr,
-        wifi_tdls_status *status) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_tdls_status *status) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_get_tdls_capabilities(wifi_interface_handle iface,
-        wifi_tdls_capabilities *capabilities) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_tdls_capabilities *capabilities) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_set_bssid_hotlist(wifi_request_id id, wifi_interface_handle iface,
-        wifi_bssid_hotlist_params params, wifi_hotlist_ap_found_handler handler) {
-      return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_bssid_hotlist_params params, wifi_hotlist_ap_found_handler handler) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_start_sending_offloaded_packet(wifi_request_id id,
-        wifi_interface_handle iface, u8 *ip_packet, u16 ip_packet_len,
-        u8 *src_mac_addr, u8 *dst_mac_addr, u32 period_msec) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+		wifi_interface_handle iface, u8 *ip_packet, u16 ip_packet_len,
+		u8 *src_mac_addr, u8 *dst_mac_addr, u32 period_msec) {
+	return WIFI_ERROR_NOT_SUPPORTED;
 }
 
 wifi_error wifi_stop_sending_offloaded_packet(wifi_request_id id, wifi_interface_handle iface) {
-    return WIFI_ERROR_NOT_SUPPORTED;
+	return WIFI_ERROR_NOT_SUPPORTED;
+}
+
+wifi_error wifi_set_scanning_mac_oui(wifi_interface_handle iface, unsigned char *buffer) {
+	/*
+	 * This function is obsolete.
+	 * As agreed with Google, returning success.
+	 */
+	return WIFI_SUCCESS;
 }
 
 wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
@@ -575,5 +598,6 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	hal_fn->wifi_stop_sending_offloaded_packet = wifi_stop_sending_offloaded_packet;
 	hal_fn->wifi_is_epr_supported = wifi_is_epr_supported;
 	hal_fn->wifi_reset_iface_event_handler = wifi_reset_iface_event_handler;
+	hal_fn->wifi_set_scanning_mac_oui = wifi_set_scanning_mac_oui;
 	return WIFI_SUCCESS;
 }
