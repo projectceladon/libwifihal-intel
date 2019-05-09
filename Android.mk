@@ -19,9 +19,48 @@ LOCAL_CPPFLAGS += \
         -Wno-unused-parameter \
         -Wno-int-to-pointer-cast \
         -Wno-missing-field-initializers \
-        -Wno-conversion-null \
-        -Werror \
-        -Wnull-dereference
+	-Wno-conversion-null \
+	-Werror \
+	-Wnull-dereference \
+	-Waddress \
+	-Warray-bounds \
+	-Wc++11-compat \
+	-Wc++14-compat \
+	-Wchar-subscripts \
+	-Wcomment \
+	-Wduplicate-decl-specifier \
+	-Wenum-compare \
+	-Wformat \
+	-Wimplicit \
+	-Wimplicit-int \
+	-Wimplicit-function-declaration \
+	-Winit-self \
+	-Wlogical-not-parentheses \
+	-Wmain \
+	-Wmaybe-uninitialized \
+	-Wmissing-braces \
+	-Wnarrowing \
+	-Wnonnull \
+	-Wparentheses \
+	-Wpessimizing-move \
+	-Wpointer-sign \
+	-Wreorder \
+	-Wreturn-type \
+	-Wsequence-point \
+	-Wsign-compare \
+	-Wsizeof-pointer-memaccess \
+	-Wstrict-aliasing \
+	-Wstrict-overflow=1 \
+	-Wswitch \
+	-Wtautological-compare \
+	-Wtrigraphs \
+	-Wuninitialized \
+	-Wunknown-pragmas \
+	-Wunused-function \
+	-Wunused-label \
+	-Wunused-value \
+	-Wunused-variable \
+	-Wvolatile-register-var
 LOCAL_CPPFLAGS += -DCONFIG_LIBNL20
 LOCAL_CPPFLAGS += -DCONFIG_ANDROID_LOG
 
