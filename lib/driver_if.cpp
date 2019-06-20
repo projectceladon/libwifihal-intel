@@ -1922,9 +1922,6 @@ int driver_get_fw_version(void *handle, char *buf, int buf_size)
 
 	ret = drv_vendor_cmd(drv, IWL_MVM_VENDOR_CMD_GET_FW_VERSION,
 			     NULL, 0, 0, get_fw_version_handler, buf);
-	if (!buf)
-		ret = -EINVAL;
-
 	return ret;
 }
 
@@ -1968,9 +1965,6 @@ int driver_get_drv_version(void *handle, char *buf, int buf_size)
 
 	ret = drv_vendor_cmd(drv, IWL_MVM_VENDOR_CMD_GET_DRV_VERSION,
 			     NULL, 0, 0, get_drv_version_handler, buf);
-	if (!buf)
-	    ret = -EINVAL;
-
 	return ret;
 }
 
