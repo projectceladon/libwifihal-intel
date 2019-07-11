@@ -262,7 +262,10 @@ int wpa_driver_nl80211_driver_cmd(void *priv, char *cmd, char *buf, size_t buf_l
 	}
 	else if (os_strncasecmp(cmd, "RXFILTER-", 9) == 0) {
 		/* Handle all the RXFILTER-*  cmds */
-		ret = wpa_driver_nl80211_rxfilter(priv, cmd + 9);
+               wpa_printf(MSG_ERROR,
+                       "%s: Skip RXFILTER\n", __func__);
+               drv_errors = 0;
+               ret = 0;
 	}
 	else if (os_strncasecmp(cmd, "COUNTRY", 7) == 0) {
 		/*
