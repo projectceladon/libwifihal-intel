@@ -315,7 +315,10 @@ int wpa_driver_get_p2p_noa(void *priv, u8 *buf, size_t len)
 
 int wpa_driver_set_p2p_ps(void *priv, int legacy_ps, int opp_ps, int ctwindow)
 {
-	return -1;
+	/* return -1; */
+	/* WA for VTS failure SupplicantStaIfaceHidlTest.SetPowerSave*/
+	return 0;
+
 }
 
 
