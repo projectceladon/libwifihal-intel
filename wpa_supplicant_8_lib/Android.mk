@@ -44,6 +44,21 @@ endif
 ifdef CONFIG_ANDROID_LOG
 L_CFLAGS += -DCONFIG_ANDROID_LOG
 endif
+L_CFLAGS += \
+           -D_FORTIFY_SOURCE=2 \
+           -fstack-protector-strong \
+           -fno-strict-overflow \
+           -fwrapv \
+           -Wformat -Wformat-security \
+           -Wall -Wextra -Wsign-compare -Wpointer-arith \
+           -Wno-unused-parameter \
+           -Wno-unused-variable \
+           -Wno-unused-function \
+           -Wno-missing-field-initializers \
+           -Wno-int-to-pointer-cast \
+           -Wno-conversion-null \
+           -Werror \
+           -Wnull-dereference
 
 ########################
 
