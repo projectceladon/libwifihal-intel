@@ -9,10 +9,11 @@ UTIL_DIR := util
 
 LOCAL_REQUIRED_MODULES :=
 
-LOCAL_CPPFLAGS += -Wno-unused-parameter -Wno-int-to-pointer-cast -Wno-missing-field-initializers
 LOCAL_CPPFLAGS += \
         -D_FORTIFY_SOURCE=2 \
         -fstack-protector-strong \
+        -fno-strict-overflow \
+        -fwrapv \
         -Wformat -Wformat-security \
         -Wall -Wextra -Wsign-compare -Wpointer-arith \
         -Wcast-qual -Wcast-align \
