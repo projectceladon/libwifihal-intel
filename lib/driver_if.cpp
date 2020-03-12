@@ -1152,7 +1152,7 @@ static int station_dump(struct nl_msg *msg, struct nlattr **tb,
 		return -1;
 	}
 
-	if (nla_parse_nested(tids, IEEE80211_NUM_TIDS + 2,
+	if (nla_parse_nested(tids, IEEE80211_NUM_TIDS + 1,
 			     sinfo[NL80211_STA_INFO_TID_STATS],
 			     NULL)) {
 		hal_printf(MSG_ERROR, "failed to parse tid info nested attributes!");
