@@ -54,6 +54,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := lib_driver_cmd_intc
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SHARED_LIBRARIES := libc libcutils libnl libnetutils
+LOCAL_HEADER_LIBRARIES += libutils_headers libhardware_headers
 LOCAL_CFLAGS := $(L_CFLAGS)
 LOCAL_SRC_FILES := $(WPA_SRC_FILE)
 LOCAL_C_INCLUDES := $(WPA_SUPPL_DIR_INCLUDE) \

@@ -74,6 +74,7 @@
 #include <netlink/msg.h>
 #include <netlink/attr.h>
 #include <net/if.h>
+#include <linux/iwl-vendor-cmd.h>
 
 #include "common.h"
 #include "linux_ioctl.h"
@@ -84,8 +85,6 @@
 #ifdef ANDROID
 #include "android_drv.h"
 #endif
-
-#include "iwl_vendor_cmd_copy.h"
 
 static int drv_errors = 0;
 
@@ -174,72 +173,6 @@ static int nl80211_vendor_cmd(void *priv, unsigned int vendor_id,
 	return ret;
 
 fail:
-	nlmsg_free(msg);
-	return -ENOBUFS;
-}
-
-/* needed by external/wpa_supplicant_8/src/drivers/driver_nl80211.c */
-static int wpa_driver_nl80211_rxfilter(void *priv, char *cmd)
-{
-	struct i802_bss *bss = priv;
-	struct wpa_driver_nl80211_data *drv = bss->drv;
-	struct nl_msg *msg;
-	int ret, num;
-	u8 op;
-
-	wpa_printf(MSG_DEBUG, "%s Enter", __func__);
-	/* Ignore filter commands on p2p device */
-	if (drv->nlmode == NL80211_IFTYPE_P2P_DEVICE)
-		return 0;
-	if (os_strncasecmp(cmd, "ADD ", 4) == 0) {
-		/* framework requested not to filter the frames */
-		if (sscanf(cmd + 4, "%d", &num) != 1)
-		    return -EINVAL;
-		op = IWL_MVM_VENDOR_RXFILTER_OP_PASS;
-	} else if (os_strncasecmp(cmd, "REMOVE ", 7) == 0) {
-		/* framework allows to filter the frames */
-		if (sscanf(cmd + 7, "%d", &num) != 1)
-		    return -EINVAL;
-		op = IWL_MVM_VENDOR_RXFILTER_OP_DROP;
-	} else if (os_strncasecmp(cmd, "START", 5) == 0) {
-		/* Currently we don't use start and stop */
-		return 0;
-	} else if (os_strncasecmp(cmd, "STOP", 4) == 0) {
-		/* Currently we don't use start and stop */
-		return 0;
-	} else {
-		wpa_printf(MSG_ERROR, "%s Exiting due to invalid value", __func__);
-		return -EINVAL;
-	}
-	if (num < 0 || num > 3)
-		return -EINVAL;
-
-	msg = nlmsg_alloc();
-	if (!msg)
-		return -ENOMEM;
-
-	NLA_PUT_U32(msg, IWL_MVM_VENDOR_ATTR_RXFILTER_OP, op);
-	NLA_PUT_U32(msg, IWL_MVM_VENDOR_ATTR_RXFILTER, 1 << num);
-
-	ret = nl80211_vendor_cmd(priv, INTEL_OUI,
-			IWL_MVM_VENDOR_CMD_RXFILTER,
-			nlmsg_data(nlmsg_hdr(msg)),
-			nlmsg_datalen(nlmsg_hdr(msg)), NULL);
-
-	wpa_printf(MSG_DEBUG,
-			"nl80211: configure rxfilter = %d, op = %d, ret = %d",
-			num, op, ret);
-
-	nlmsg_free(msg);
-
-	if (ret < 0)
-		wpa_driver_send_hang_msg(drv);
-	else
-		drv_errors = 0;
-	wpa_printf(MSG_DEBUG, "%s Exiting with ret: %d", __func__, ret);
-	return ret;
-
-nla_put_failure:
 	nlmsg_free(msg);
 	return -ENOBUFS;
 }

@@ -44,6 +44,9 @@ LOCAL_SRC_FILES := \
 	$(UTIL_DIR)/hal_debug.cpp \
 	lib/driver_if.cpp \
 
+LOCAL_SHARED_LIBRARIES := liblog libcutils libdl
+LOCAL_HEADER_LIBRARIES += libutils_headers libhardware_headers
+
 ifdef CONFIG_DEBUG
 ifeq ($(shell expr $(CONFIG_DEBUG) : '[0-3]$\'), 1)
 LOCAL_CPPFLAGS += -DCONFIG_DEBUG=$(CONFIG_DEBUG)
@@ -51,8 +54,6 @@ else
 $(error CONFIG_DEBUG must be an integer between 0 and 3)
 endif
 endif
-
-LOCAL_HEADER_LIBRARIES := libutils_headers
 
 LOCAL_MODULE := libwifi-hal-intel
 LOCAL_PROPRIETARY_MODULE := true
