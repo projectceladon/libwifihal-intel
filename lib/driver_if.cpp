@@ -28,9 +28,9 @@
 #include <math.h>
 
 #include "utils.h"
-#include "iwl_vendor_cmd_copy.h"
+#include <linux/iwl-vendor-cmd.h>
 #include "driver_if.h"
-#include "nl80211_copy.h"
+#include <linux/nl80211.h>
 #include "hal_debug.h"
 
 /* libnl 1.x compatibility code */
@@ -112,14 +112,6 @@ struct band_info {
 	u32 n_channels;
 };
 
-struct ftm_data {
-	int last_req_id;
-	u64 last_req_cookie;
-	u32 max_2_sided;
-	u32 max_total;
-	struct dl_list cur_response;
-};
-
 #define DRV_POLL_TIMEOUT_SEC 5
 
 struct drv_state {
@@ -145,7 +137,6 @@ struct drv_state {
 	bool tdls_supported;
 #endif // ENABLE_TDLS
 	bool self_managed_reg;
-	struct ftm_data ftm;
 
 	/* Assumes that the event loop is running in a different thread */
 	pthread_mutex_t sync;
@@ -794,29 +785,6 @@ static void wiphy_get_supported_iftypes(struct nlattr *attr, u32 *iftypes)
 	hal_printf(MSG_DEBUG, "Supported iftypes=0x%X", *iftypes);
 }
 
-
-static int wiphy_info_ftm_init_capa(struct nlattr *capa_attr,
-				    struct drv_state *drv)
-{
-	struct nlattr *tb[NL80211_FTM_CAPA_MAX + 1];
-
-	if (!capa_attr || !drv)
-		return -1;
-
-	if (nla_parse_nested(tb, NL80211_FTM_CAPA_MAX, capa_attr, NULL) ||
-	    !tb[NL80211_FTM_CAPA_MAX_2_SIDED] ||
-	    !tb[NL80211_FTM_CAPA_MAX_TOTAL] ||
-	    !tb[NL80211_FTM_CAPA_PREAMBLE] ||
-	    !tb[NL80211_FTM_CAPA_BW])
-		return -1;
-
-	drv->ftm.max_total = nla_get_u32(tb[NL80211_FTM_CAPA_MAX_TOTAL]);
-	drv->ftm.max_2_sided = nla_get_u32(tb[NL80211_FTM_CAPA_MAX_2_SIDED]);
-
-	/* TODO: add more FTM capabs */
-	return 0;
-}
-
 /**
  * wiphy_info_handler - get the phy information handler
  * @msg - pointer to the response msg
@@ -863,8 +831,6 @@ static int wiphy_info_handler(struct nl_msg *msg, void *data)
 
 	if (tb[NL80211_ATTR_WIPHY])
 		drv->wiphy_idx = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
-
-	wiphy_info_ftm_init_capa(tb[NL80211_ATTR_MSRMENT_FTM_CAPA], drv);
 
 	wiphy_info_vendor(tb[NL80211_ATTR_VENDOR_DATA], drv, "command");
 	wiphy_info_vendor(tb[NL80211_ATTR_VENDOR_EVENTS], drv, "event");
@@ -1642,7 +1608,6 @@ void *driver_if_init(void *handle, drv_event_cb event_cb, u32 ifidx)
 	}
 
 	pthread_mutex_init(&drv->sync, NULL);
-	dl_list_init(&drv->ftm.cur_response);
 	drv->initialized = true;
 
 	hal_printf(MSG_DEBUG, "Succesfully initialized driver interface");
@@ -1788,8 +1753,6 @@ int driver_get_channels(void *handle, wifi_band band, int *size,
 	if (DRV_NOT_INIT(drv, __func__))
 		return 0;
 
-	hal_printf(MSG_ERROR, "get_channels band=%u, size=%d", band, *size);
-
 	memset(list, 0, sizeof(wifi_channel) * (*size));
 	for (i = 0, k = 0; i < drv->n_bands; i++) {
 		struct band_info *curb = &drv->bands[i];
@@ -1895,11 +1858,11 @@ static int get_fw_version_handler(struct nl_msg *msg, void *arg)
 
 	if (nla_parse_nested(cap, MAX_IWL_MVM_VENDOR_ATTR,
 	    data, attr_policy)) {
-		hal_printf(MSG_WARNING, "Failed to get fw version");
+		hal_printf(MSG_ERROR, "Failed to get fw version");
 		return NL_SKIP;
 	}
 	if (!cap[IWL_MVM_VENDOR_ATTR_FW_VER]) {
-	    hal_printf(MSG_DEBUG, "nl80211: F/w version unavailable");
+	    hal_printf(MSG_ERROR, "nl80211: F/w version unavailable");
 	    return NL_SKIP;
 	}
 
@@ -1997,7 +1960,7 @@ int driver_set_country_code(void *handle, const char *code)
 static void event_handler_sock(struct nl_sock *sock)
 {
 	struct nl_cb *cb = NULL;
-	
+
 	if (sock != NULL) {
 		cb = nl_socket_get_cb(sock);
 
