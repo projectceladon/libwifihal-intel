@@ -166,7 +166,7 @@ static int nl80211_vendor_cmd(void *priv, unsigned int vendor_id,
 		goto fail;
 	}
 
-	ret = send_and_recv_msgs(drv, msg, vendor_reply_handler, buf);
+	ret = send_and_recv_msgs(drv, msg, vendor_reply_handler, buf, NULL, NULL);
 	if (ret)
 		wpa_printf(MSG_DEBUG, "nl80211: vendor command failed err=%d",
 			   ret);
