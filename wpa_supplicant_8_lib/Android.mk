@@ -44,8 +44,7 @@ endif
 ifdef CONFIG_ANDROID_LOG
 L_CFLAGS += -DCONFIG_ANDROID_LOG
 endif
-L_CFLAGS += -fno-strict-overflow \
-            -fno-delete-null-pointer-checks \
+L_CFLAGS += -fno-delete-null-pointer-checks \
             -fwrapv
 
 ########################

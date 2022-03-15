@@ -13,7 +13,6 @@ LOCAL_CPPFLAGS += -Wno-unused-parameter -Wno-int-to-pointer-cast -Wno-missing-fi
 LOCAL_CPPFLAGS += \
         -D_FORTIFY_SOURCE=2 \
         -fstack-protector-strong \
-        -fno-strict-overflow \
         -fno-delete-null-pointer-checks \
         -fwrapv \
         -Wformat -Wformat-security \
