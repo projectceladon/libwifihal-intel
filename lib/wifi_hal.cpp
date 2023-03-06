@@ -82,14 +82,10 @@ void handle_if_init(wifi_handle handle)
 			num_ifaces++;
 	}
 
-	if (!num_ifaces)
+	if (!num_ifaces && !d)
 		goto out;
 
 	rewinddir(d);
-	if (!d) {
-		hal_printf(MSG_ERROR, "Unable to rewind interface directory!");
-		goto out;
-	}
 
 	handle->ifaces = (wifi_interface_handle *)
 		malloc(sizeof(wifi_interface_handle) * num_ifaces);
@@ -540,7 +536,7 @@ wifi_error wifi_get_tdls_capabilities(wifi_interface_handle iface,
 }
 
 wifi_error wifi_set_bssid_hotlist(wifi_request_id id, wifi_interface_handle iface,
-		wifi_bssid_hotlist_params params, wifi_hotlist_ap_found_handler handler) {
+		wifi_bssid_hotlist_params *params, wifi_hotlist_ap_found_handler handler) {
 	return WIFI_ERROR_NOT_SUPPORTED;
 }
 

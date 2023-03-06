@@ -55,6 +55,7 @@ static inline int nl_socket_set_buffer_size(struct nl_sock *sk,
 }
 
 #endif /* CONFIG_LIBNL20 && CONFIG_LIBNL30 */
+#define CC_LEN	2
 
 /* C++ compatability */
 
@@ -251,9 +252,11 @@ static int send_and_recv_sock(struct drv_state *drv, struct nl_msg *msg,
 	err = 1;
 	while (err > 0) {
 		int res = nl_recvmsgs(sock, cb);
-		if (res < 0)
+		if (res < 0) {
 			hal_printf(MSG_DEBUG,
 				   "nl80211: nl_recvmsgs failed: %d", res);
+			err = res;
+		}
 	}
 
  out:
@@ -1246,6 +1249,7 @@ static int bss_info_handler(struct nl_msg *msg, void *arg)
 		beacon_ie_len = nla_len(bss[NL80211_BSS_BEACON_IES]);
 	}
 
+	/* TODO: Check if below allocation is needed. */
 	bss_info = (struct bss_info *)zalloc(sizeof(struct bss_info) + ie_len +
 					  beacon_ie_len);
 	if (!bss_info) {
@@ -1267,6 +1271,13 @@ static int bss_info_handler(struct nl_msg *msg, void *arg)
 	bss_info->beacon_ies_len = beacon_ie_len;
 	memcpy(bss_info->ies, ie, ie_len);
 	memcpy(bss_info->ies + ie_len, beacon_ie, beacon_ie_len);
+
+	/* If we intend to save bss info, then a bss_list should be created
+	 * and individual station information should be appended to it. So
+	 * now though we are not saving bss info, let free the memory here.
+	 * TODO: create bss_list to fetch and update station info, here.
+	 */
+	free(bss_info);
 
 	return NL_SKIP;
 }
@@ -1378,6 +1389,7 @@ static int survey_handler(struct nl_msg *msg, void *arg)
 
 	dl_list_add_tail(survey_list, &survey->list);
 
+	free(survey);
 	return NL_SKIP;
 }
 
@@ -1533,7 +1545,8 @@ static void drv_cleanup(struct drv_state *drv)
 		pthread_kill(drv->event_thread, SIGUSR1);
 
 		hal_printf(MSG_DEBUG, "Pending event loop");
-		usleep(10000);
+		if (!usleep(10000))
+			hal_printf(MSG_ERROR, "Failed to sleep");
 	}
 
 complete_cleanup:
@@ -1833,10 +1846,14 @@ int driver_get_country_code(void *handle, char *code)
 	if (drv->wiphy_idx > 0 && drv->self_managed_reg)
 		NLA_PUT_U32(msg, NL80211_ATTR_WIPHY, drv->wiphy_idx);
 
-	code[0] = '\0';
-	ret = send_and_recv(drv, msg, get_country_handler, code);
-	if (!code)
-		ret = -EINVAL;
+	code = (char *) malloc(CC_LEN * sizeof(char));
+	if (code) {
+		ret = send_and_recv(drv, msg, get_country_handler, code);
+		if (!code)
+			ret = -EINVAL;
+	} else {
+		hal_printf(MSG_ERROR, "Failed to allocate memory");
+	}
 
 	return ret;
 nla_put_failure:
