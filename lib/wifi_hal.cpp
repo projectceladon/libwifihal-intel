@@ -82,7 +82,7 @@ void handle_if_init(wifi_handle handle)
 			num_ifaces++;
 	}
 
-	if (!num_ifaces && !d)
+	if (!num_ifaces)
 		goto out;
 
 	rewinddir(d);

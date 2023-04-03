@@ -1170,6 +1170,7 @@ static int station_dump_handler(struct nl_msg *msg, void *arg)
 
 	dl_list_add_tail(sta_list, &s->list);
 
+	free(s);
 	return NL_SKIP;
 }
 
@@ -1849,10 +1850,10 @@ int driver_get_country_code(void *handle, char *code)
 	code = (char *) malloc(CC_LEN * sizeof(char));
 	if (code) {
 		ret = send_and_recv(drv, msg, get_country_handler, code);
-		if (!code)
-			ret = -EINVAL;
 	} else {
 		hal_printf(MSG_ERROR, "Failed to allocate memory");
+		nlmsg_free(msg);
+		ret = -EINVAL;
 	}
 
 	return ret;
