@@ -562,6 +562,16 @@ wifi_error wifi_set_scanning_mac_oui(wifi_interface_handle iface, unsigned char 
 	return WIFI_SUCCESS;
 }
 
+wifi_error wifi_virtual_interface_create(wifi_handle handle, const char* ifname,
+        wifi_interface_type iface_type)
+{
+	/*
+	 * wlan0(sta) and wlan1(ap) interface will be created in init.rc by iw add command
+	 */
+	hal_printf(MSG_DEBUG, "%s", __func__);
+	return WIFI_SUCCESS;
+}
+
 wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	if (hal_fn == NULL) {
 		return WIFI_ERROR_UNINITIALIZED;
