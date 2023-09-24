@@ -609,5 +609,6 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	hal_fn->wifi_is_epr_supported = wifi_is_epr_supported;
 	hal_fn->wifi_reset_iface_event_handler = wifi_reset_iface_event_handler;
 	hal_fn->wifi_set_scanning_mac_oui = wifi_set_scanning_mac_oui;
+	hal_fn->wifi_virtual_interface_create = wifi_virtual_interface_create;
 	return WIFI_SUCCESS;
 }
