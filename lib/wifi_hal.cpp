@@ -560,6 +560,14 @@ wifi_error wifi_set_scanning_mac_oui(wifi_interface_handle iface, unsigned char 
 	return WIFI_SUCCESS;
 }
 
+wifi_error wifi_get_packet_filter_capabilities(
+		wifi_interface_handle handle, u32 *version, u32 *max_len)
+{
+    *version = 4;
+    *max_len = 4096;
+    return WIFI_SUCCESS;
+}
+
 wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	if (hal_fn == NULL) {
 		return WIFI_ERROR_UNINITIALIZED;
@@ -597,5 +605,6 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	hal_fn->wifi_is_epr_supported = wifi_is_epr_supported;
 	hal_fn->wifi_reset_iface_event_handler = wifi_reset_iface_event_handler;
 	hal_fn->wifi_set_scanning_mac_oui = wifi_set_scanning_mac_oui;
+	hal_fn->wifi_get_packet_filter_capabilities = wifi_get_packet_filter_capabilities;
 	return WIFI_SUCCESS;
 }
