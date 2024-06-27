@@ -568,6 +568,12 @@ wifi_error wifi_get_packet_filter_capabilities(
     return WIFI_SUCCESS;
 }
 
+wifi_error wifi_nan_register_handler(wifi_interface_handle iface,
+                                  NanCallbackHandler handlers) {
+    //TODO: Send all vendor cmds for configuring NAN to driver.
+    return WIFI_SUCCESS;
+}
+
 wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	if (hal_fn == NULL) {
 		return WIFI_ERROR_UNINITIALIZED;
@@ -606,5 +612,6 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *hal_fn) {
 	hal_fn->wifi_reset_iface_event_handler = wifi_reset_iface_event_handler;
 	hal_fn->wifi_set_scanning_mac_oui = wifi_set_scanning_mac_oui;
 	hal_fn->wifi_get_packet_filter_capabilities = wifi_get_packet_filter_capabilities;
+	hal_fn->wifi_nan_register_handler = wifi_nan_register_handler;
 	return WIFI_SUCCESS;
 }
