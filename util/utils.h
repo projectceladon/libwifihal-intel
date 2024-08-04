@@ -19,9 +19,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <hardware_legacy/wifi_hal.h>
 #include "list.h"
-#include "wifi_hal.h"
 
 #ifndef BIT
 #define BIT(_x) (1 << (_x))

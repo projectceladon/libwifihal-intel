@@ -41,8 +41,8 @@
 
 #include <net/if.h>
 #include <pthread.h>
+#include <hardware_legacy/wifi_hal.h>
 #include "utils.h"
-#include "wifi_hal.h"
 #include "ieee802_11_defs.h"
 
 struct wifi_interface_info {
