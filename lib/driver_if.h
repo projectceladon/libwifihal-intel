@@ -17,11 +17,7 @@
 #ifndef __DRIVER_IF_H__
 #define __DRIVER_IF_H__
 
-#ifdef ANDROID
-#include <wifi_hal.h>
-#else
-#include "wifi_hal.h"
-#endif
+#include <hardware_legacy/wifi_hal.h>
 #include "ieee802_11_defs.h"
 #include "utils.h"
 
