@@ -2044,13 +2044,13 @@ void driver_if_events(void *handle)
 	while (!drv->in_cleanup) {
 		pfd[1].fd = drv->nl_rtt ? nl_socket_get_fd(drv->nl_rtt) : -1;
 		int res = ppoll(pfd, NFDS, &ts, &sms);
-		hal_printf(MSG_ERROR, "Out of event poll");
+		hal_printf(MSG_DEBUG, "Out of event poll");
 
 		if (res < 0 && errno != EINTR) {
 			hal_printf(MSG_ERROR,
 				   "Error event socket res=%d, errno=%d", res, errno);
 		} else if (res == 0) {
-			hal_printf(MSG_ERROR, "Timeout on event socket");
+			hal_printf(MSG_DEBUG, "Timeout on event socket");
 		} else {
 			for (i = 0; i < NFDS; i++) {
 				if (pfd[i].revents & POLLERR) {
