@@ -1479,7 +1479,7 @@ static int nl80211_process_event(struct nl_msg *msg, void *arg)
 	nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
 		  genlmsg_attrlen(gnlh, 0), NULL);
 
-	hal_printf(MSG_DEBUG, "Drv Event %d received", gnlh->cmd);
+	//hal_printf(MSG_DEBUG, "Drv Event %d received", gnlh->cmd);
 
 	switch (gnlh->cmd) {
 	case NL80211_CMD_VENDOR:
@@ -2044,7 +2044,7 @@ void driver_if_events(void *handle)
 	while (!drv->in_cleanup) {
 		pfd[1].fd = drv->nl_rtt ? nl_socket_get_fd(drv->nl_rtt) : -1;
 		int res = ppoll(pfd, NFDS, &ts, &sms);
-		hal_printf(MSG_ERROR, "Out of event poll");
+		//hal_printf(MSG_ERROR, "Out of event poll");
 
 		if (res < 0 && errno != EINTR) {
 			hal_printf(MSG_ERROR,
@@ -2071,8 +2071,8 @@ void driver_if_events(void *handle)
 						   "event socket %d closed", i);
 					break;
 				} else if (pfd[i].revents & POLLIN) {
-					hal_printf(MSG_DEBUG,
-						   "Data on event socket %d", i);
+					//hal_printf(MSG_DEBUG,
+					//	   "Data on event socket %d", i);
 					event_handler_sock(i == 0 ?
 							   drv->nl_event :
 							   drv->nl_rtt);
