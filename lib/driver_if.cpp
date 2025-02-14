@@ -2005,11 +2005,14 @@ void driver_if_events(void *handle)
 	if (DRV_NOT_INIT(drv, __func__))
 		return;
 
+	MUTEX_LOCK(&drv->sync);
 	if (drv->event_thread) {
+		MUTEX_UNLOCK(&drv->sync);
 		hal_printf(MSG_ERROR, "%s called when already on event loop",
 			   __func__);
 		return;
 	}
+	MUTEX_UNLOCK(&drv->sync);
 
 	if (MUTEX_LOCK(&drv->sync))
 		return;
@@ -2041,7 +2044,13 @@ void driver_if_events(void *handle)
 	hal_printf(MSG_DEBUG, "Starting event loop tid=%u",
 		   drv->event_thread);
 
-	while (!drv->in_cleanup) {
+	while (! [&]()-> bool {
+			MUTEX_LOCK(&drv->sync);
+			bool ret = drv->in_cleanup;
+			MUTEX_UNLOCK(&drv->sync);
+			return ret;
+			}()
+		) {
 		pfd[1].fd = drv->nl_rtt ? nl_socket_get_fd(drv->nl_rtt) : -1;
 		int res = ppoll(pfd, NFDS, &ts, &sms);
 		hal_printf(MSG_ERROR, "Out of event poll");
