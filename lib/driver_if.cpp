@@ -2041,8 +2041,10 @@ void driver_if_events(void *handle)
 		return;
 	}
 
+	MUTEX_LOCK(&drv->sync);
 	hal_printf(MSG_DEBUG, "Starting event loop tid=%u",
 		   drv->event_thread);
+	MUTEX_UNLOCK(&drv->sync);
 
 	while (! [&]()-> bool {
 			MUTEX_LOCK(&drv->sync);
